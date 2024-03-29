@@ -70,7 +70,7 @@ void PasingFolder(char buffer[201],char currentFile[201])
         closedir(Directory);
 }
 
-void FindSnapshotNumber()
+int FindSnapshotNumber()
 {
     FILE *SaveFiles;
     // /home/brajeluca/Desktop/SnapSaves/ this is the place where I will save snapshots
@@ -80,10 +80,22 @@ void FindSnapshotNumber()
     if(Directory==NULL)
     printf("YOU SUCK LOSER"); 
     else
-    printf("It worked!%s",DirectoryPath);
+    printf("It worked!%s\n",DirectoryPath);
     //now here i want to do something similar and read files from there and consider all are true and see how many files named snapshotNRx i have and add another then return the number + 1 of our current file to be able to integrate a new thingy
+    int i=0;
+    struct dirent *FileFromFolder;
+    while((FileFromFolder=readdir(Directory))!=NULL)
+            {
+                if(strstr(FileFromFolder->d_name,"SnapShot"))
+                i++;
+            }
     
+    return i;
+
 }
+
+
+
 
 int main(int argc,char* argv[]){
     printf("We will solve this problem!\n");
@@ -95,7 +107,15 @@ int main(int argc,char* argv[]){
     char buffered[201]="";
    strcat(buffered,argv[1]);
     //PasingFolder(buffered,argv[1]);
-    FindSnapshotNumber();
+    
+    int VersionNR= FindSnapshotNumber();
+    char SnapShot[]="SnapShot_";
+    char VersionToString[20];
+    sprintf(VersionToString,"%d",VersionNR);
+    strcat(SnapShot,VersionToString);
+    printf("%s",SnapShot);
+
+
     
 
 }
