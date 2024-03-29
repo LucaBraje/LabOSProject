@@ -23,24 +23,24 @@
 void PasingFolder(char buffer[201],char currentFile[201])
 {
     DIR *Directory;
-    Directory = opendir(currentFile);
-    strcat(buffer,currentFile);
+    Directory = opendir(buffer);
     if(Directory!=NULL)
         {
-            printf("We read and initialised a directory %s!!!\n",buffer);
+            printf("We read and initialised a directory %s!!!\n",currentFile);
             struct dirent *FileFromFolder;
             while((FileFromFolder=readdir(Directory))!=NULL)
             {
                 if(strcmp(FileFromFolder->d_name,".")!=0 )
                     if(strcmp(FileFromFolder->d_name,"..")!=0 )
                 {
-                char AuxBuffer[200];
+                char AuxBuffer[201]="";
                 strcpy(AuxBuffer,buffer);
-
-                strcat(currentFile,FileFromFolder->d_name);
+                char current[201]="";
+                strcat(current,FileFromFolder->d_name);
                 strcat(AuxBuffer,"/");
-                strcat(AuxBuffer,currentFile);
-                printf("Address:%s\n",AuxBuffer);
+                strcat(AuxBuffer,current);
+                
+                //printf("Address:%s\n",AuxBuffer);
                 
                 struct stat st;
 
@@ -48,7 +48,13 @@ void PasingFolder(char buffer[201],char currentFile[201])
                 {
                     if (S_ISDIR(st.st_mode)) 
                         {
-                        printf("it is a directory\n");
+                        
+                        PasingFolder(AuxBuffer,current); // on current it is what we want to open next , and on AuxBuffer the adress
+                        }
+                        else
+                        {
+                            printf("Address:%s\n",AuxBuffer);
+
                         }
                 }
                 
@@ -64,7 +70,20 @@ void PasingFolder(char buffer[201],char currentFile[201])
         closedir(Directory);
 }
 
-
+void FindSnapshotNumber()
+{
+    FILE *SaveFiles;
+    // /home/brajeluca/Desktop/SnapSaves/ this is the place where I will save snapshots
+    DIR *Directory;
+    char DirectoryPath[201]="/home/brajeluca/Desktop/SnapSaves/";
+    Directory = opendir(DirectoryPath);
+    if(Directory==NULL)
+    printf("YOU SUCK LOSER"); 
+    else
+    printf("It worked!%s",DirectoryPath);
+    //now here i want to do something similar and read files from there and consider all are true and see how many files named snapshotNRx i have and add another then return the number + 1 of our current file to be able to integrate a new thingy
+    
+}
 
 int main(int argc,char* argv[]){
     printf("We will solve this problem!\n");
@@ -74,8 +93,9 @@ int main(int argc,char* argv[]){
     }
     
     char buffered[201]="";
-    PasingFolder(buffered,argv[1]);
-    
+   strcat(buffered,argv[1]);
+    //PasingFolder(buffered,argv[1]);
+    FindSnapshotNumber();
     
 
 }
