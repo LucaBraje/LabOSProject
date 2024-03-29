@@ -20,6 +20,51 @@
 #include <unistd.h>
 
 
+void PasingFolder(char buffer[201],char currentFile[201])
+{
+    DIR *Directory;
+    Directory = opendir(currentFile);
+    strcat(buffer,currentFile);
+    if(Directory!=NULL)
+        {
+            printf("We read and initialised a directory %s!!!\n",buffer);
+            struct dirent *FileFromFolder;
+            while((FileFromFolder=readdir(Directory))!=NULL)
+            {
+                if(strcmp(FileFromFolder->d_name,".")!=0 )
+                    if(strcmp(FileFromFolder->d_name,"..")!=0 )
+                {
+                char AuxBuffer[200];
+                strcpy(AuxBuffer,buffer);
+
+                strcat(currentFile,FileFromFolder->d_name);
+                strcat(AuxBuffer,"/");
+                strcat(AuxBuffer,currentFile);
+                printf("Address:%s\n",AuxBuffer);
+                
+                struct stat st;
+
+                if (lstat(AuxBuffer, &st) == 0) 
+                {
+                    if (S_ISDIR(st.st_mode)) 
+                        {
+                        printf("it is a directory\n");
+                        }
+                }
+                
+                }
+            }
+
+        }
+
+        else
+        printf("Tough luck you failed :()\n");
+
+
+        closedir(Directory);
+}
+
+
 
 int main(int argc,char* argv[]){
     printf("We will solve this problem!\n");
@@ -28,50 +73,9 @@ int main(int argc,char* argv[]){
         printf("ERROR YOU NEED TO SPECIFY A FILEPATH!\n");
     }
     
-    DIR *Directory;
-    Directory=opendir(argv[1]);
-    char buffer[201]="";
-    strcat(buffer,argv[1]);
+    char buffered[201]="";
+    PasingFolder(buffered,argv[1]);
     
-    if(Directory!=NULL)
-    {
-        printf("We read and initialised a directory %s!!!\n",buffer);
-        struct dirent *FileFromFolder;
-        while((FileFromFolder=readdir(Directory))!=NULL)
-        {
-            if(strcmp(FileFromFolder->d_name,".")!=0 )
-                if(strcmp(FileFromFolder->d_name,"..")!=0 )
-            {
-            char AuxBuffer[200];
-            strcpy(AuxBuffer,buffer);
-            char current[200]="";
-            strcat(current,FileFromFolder->d_name);
-            strcat(AuxBuffer,"/");
-            strcat(AuxBuffer,current);
-            printf("Address:%s\n",AuxBuffer);
-            
-            struct stat st;
-
-            if (lstat(AuxBuffer, &st) == 0) 
-            {
-                if (S_ISDIR(st.st_mode)) 
-                    {
-                    printf("it is a directory\n");
-                    }
-            }
-            
-            //printf("^\n|\n-is a directory.");
-
-            //printf("%s\n",FileFromFolder->d_name);
-            }
-        }
-
-    }
-
-    else
-    printf("Tough luck you failed :()\n");
-
-
-    closedir(Directory);
+    
 
 }
