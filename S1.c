@@ -18,9 +18,12 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <errno.h>
 
 
-void PasingFolder(char buffer[201],char currentFile[201])
+void PasingFolder(char buffer[201],char currentFile[201],int fd)
 {
     DIR *Directory;
     Directory = opendir(buffer);
@@ -49,11 +52,13 @@ void PasingFolder(char buffer[201],char currentFile[201])
                     if (S_ISDIR(st.st_mode)) 
                         {
                         
-                        PasingFolder(AuxBuffer,current); // on current it is what we want to open next , and on AuxBuffer the adress
+                        PasingFolder(AuxBuffer,current,fd); // on current it is what we want to open next , and on AuxBuffer the adress
                         }
                         else
                         {
                             printf("Address:%s\n",AuxBuffer);
+                            write(fd,AuxBuffer,strlen(AuxBuffer));
+                            write(fd,"\n",1);
 
                         }
                 }
@@ -106,16 +111,29 @@ int main(int argc,char* argv[]){
     
     char buffered[201]="";
    strcat(buffered,argv[1]);
-    //PasingFolder(buffered,argv[1]);
+    
     
     int VersionNR= FindSnapshotNumber();
     char SnapShot[]="SnapShot_";
     char VersionToString[20];
     sprintf(VersionToString,"%d",VersionNR);
     strcat(SnapShot,VersionToString);
-    printf("%s",SnapShot);
 
 
+
+    char DirectoryPath[201]="/home/brajeluca/Desktop/SnapSaves/";
+    strcat(DirectoryPath,SnapShot);
+    strcat(DirectoryPath,".txt");
+    printf("%s",DirectoryPath);
+
+    int fd = open(DirectoryPath, O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (fd == -1) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+    
+
+    PasingFolder(buffered,argv[1],fd);
     
 
 }
