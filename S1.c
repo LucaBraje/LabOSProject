@@ -29,7 +29,7 @@ void PasingFolder(char buffer[201],char currentFile[201],int fd)
     Directory = opendir(buffer);
     if(Directory!=NULL)
         {
-            printf("We read and initialised a directory %s!!!\n",currentFile);
+            //printf("We read and initialised a directory %s!!!\n",currentFile);
             struct dirent *FileFromFolder;
             while((FileFromFolder=readdir(Directory))!=NULL)
             {
@@ -56,7 +56,7 @@ void PasingFolder(char buffer[201],char currentFile[201],int fd)
                         }
                         else
                         {
-                            printf("Address:%s\n",AuxBuffer);
+                           // printf("Address:%s\n",AuxBuffer);
                             write(fd,AuxBuffer,strlen(AuxBuffer));
                             write(fd,"\n",1);
 
@@ -75,7 +75,7 @@ void PasingFolder(char buffer[201],char currentFile[201],int fd)
         closedir(Directory);
 }
 
-int FindSnapshotNumber()
+int FindSnapshotNumber() //searches in the snapshot folder and counts how many snapshots it finds , to find the new number our snapshot will be
 {
     FILE *SaveFiles;
     // /home/brajeluca/Desktop/SnapSaves/ this is the place where I will save snapshots
@@ -99,8 +99,31 @@ int FindSnapshotNumber()
 
 }
 
+char * CreatePath() //creates the adress to the snapshot folder and what the name of the new Snapshot should be
+{
+    int VersionNR= FindSnapshotNumber();
+    char SnapShot[]="SnapShot_";
+    char VersionToString[20];
+    sprintf(VersionToString,"%d",VersionNR);
+    strcat(SnapShot,VersionToString);
 
+    char *DirectoryPath = (char *)malloc(201 * sizeof(char));
+    strcpy(DirectoryPath, "/home/brajeluca/Desktop/SnapSaves/");
+    strcat(DirectoryPath,SnapShot);
+    strcat(DirectoryPath,".txt");
 
+    return DirectoryPath;
+}
+
+int FileToWriteIn() // i create a file directory to write in it .
+{
+    int fd = open(CreatePath(), O_WRONLY | O_CREAT | O_TRUNC, 0666);
+    if (fd == -1) {
+        perror("Error opening file");
+        exit(EXIT_FAILURE);
+    }
+    return fd;
+}
 
 int main(int argc,char* argv[]){
     printf("We will solve this problem!\n");
@@ -110,30 +133,9 @@ int main(int argc,char* argv[]){
     }
     
     char buffered[201]="";
-   strcat(buffered,argv[1]);
-    
-    
-    int VersionNR= FindSnapshotNumber();
-    char SnapShot[]="SnapShot_";
-    char VersionToString[20];
-    sprintf(VersionToString,"%d",VersionNR);
-    strcat(SnapShot,VersionToString);
+    strcat(buffered,argv[1]);
 
-
-
-    char DirectoryPath[201]="/home/brajeluca/Desktop/SnapSaves/";
-    strcat(DirectoryPath,SnapShot);
-    strcat(DirectoryPath,".txt");
-    printf("%s",DirectoryPath);
-
-    int fd = open(DirectoryPath, O_WRONLY | O_CREAT | O_TRUNC, 0666);
-    if (fd == -1) {
-        perror("Error opening file");
-        exit(EXIT_FAILURE);
-    }
-    
-
-    PasingFolder(buffered,argv[1],fd);
+    PasingFolder(buffered,argv[1],FileToWriteIn());
     
 
 }
