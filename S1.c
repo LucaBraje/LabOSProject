@@ -8,13 +8,13 @@
 #include <fcntl.h>
 #include <errno.h>
 #include <stdlib.h>
-
+#include <sys/wait.h>
 
 void PasingFolder(char buffer[201],char currentFile[201],int fd)
 {
     DIR *Directory;
     Directory = opendir(buffer);
-    printf("%s\n",buffer);
+   // printf("%s\n",buffer);
     if(Directory!=NULL)
         {
             //printf("We read and initialised a directory %s!!!\n",currentFile);
@@ -71,6 +71,7 @@ char * CreatePath(char outputPath[201],char DirectoryName[201]) //creates the ad
  
     char *DirectoryPath = (char *)malloc(201 * sizeof(char));
     strcpy(DirectoryPath, outputPath);
+
     strcat(DirectoryPath,"/");
     strcat(DirectoryPath,DirectoryName);
    
@@ -81,7 +82,7 @@ char * CreatePath(char outputPath[201],char DirectoryName[201]) //creates the ad
 int FileToWriteIn(char outputPath[201],char DirectoryName[201]) // i create a file directory to write in it .
 {
     char *filePath = CreatePath(outputPath, DirectoryName);
-    printf("File path: %s\n", filePath); // Debug print
+   // printf("File path: %s\n", filePath); // Debug print
     
     int fd = open(CreatePath(outputPath,DirectoryName), O_WRONLY | O_CREAT | O_TRUNC, 0666);
     if (fd == -1) {
@@ -96,19 +97,40 @@ int FileToWriteIn(char outputPath[201],char DirectoryName[201]) // i create a fi
 int main(int argc,char* argv[]){
     printf("We will solve this problem!\n");
     
-    int OutputFile=FileToWriteIn(argv[2],argv[3]); 
-    printf("\nargv[2]=%s",argv[2]);
-    printf("\nargv[3]=%s",argv[3]);
+     
+   // printf("\nargv[2]=%s",argv[2]);
+   // printf("\nargv[3]=%s",argv[4]);
 
-    int i=3;
-    while(argv[i]!=NULL)
+
+
+    pid_t pid;
+    for(int i=3;i<argc;i++)
     {
-        char buffered[201]="";
-        strcat(buffered,argv[i]);
-        PasingFolder(buffered,argv[i],OutputFile);
-        i++;
-    }
-    
+        pid=fork();
 
+        if (pid == 0) {
+            // This is the child process
+            int OutputFile=FileToWriteIn(argv[2],argv[i]);
+            char buffered[201]="";
+            strcat(buffered,argv[i]);
+            PasingFolder(buffered,argv[i],OutputFile);
+            
+            printf("Child process %d - with PID %d and exit code %d\n", i-2,getpid(),pid);
+            return 0; // Child process exits after computation
+        } else if (pid < 0) {
+            // Error occurred
+            fprintf(stderr, "Fork failed\n");
+            return 1;
+        }
+
+
+    }
+
+    for (int i = 3; i < argc; ++i) {
+        wait(NULL);
+    }
+
+    
+    
 }
 
